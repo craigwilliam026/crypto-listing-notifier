@@ -1,26 +1,16 @@
-import tweepy
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
-
-# Twitter API credentials
-consumer_key = 'GyWwycS6U8pk2VvwPwr0itsa1'
-consumer_secret = 'mr5yvX4k7bmhCxeQHtxPVjyasQaMeVdgOIO5h2lnV1RWUPxNkx'
-access_token = '1495991855032713219-ePsJArOAdzD5rvCl4C43CZGrtwTVvi'
-access_token_secret = 'kLnAqAhS9r96neMLAOSDG6cynjDENMrKwJsFK5j4nNQR6'
+import os
 
 # Email credentials for ProtonMail
 smtp_server = 'smtp.protonmail.com'
 smtp_port = 587
-email_user = 'craigwilliam026@protonmail.com'
-email_password = 'craigwilliam026'
+email_user = os.getenv('EMAIL_USER')  # Make sure to set these as secrets in GitHub
+email_password = os.getenv('EMAIL_PASSWORD')
 recipient_email = 'lelouch0zerogeass@gmail.com'
-
-# Authenticate to Twitter
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
 
 def send_email(subject, body):
     msg = MIMEText(body)
@@ -28,34 +18,37 @@ def send_email(subject, body):
     msg['From'] = email_user
     msg['To'] = recipient_email
     
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()
-        server.login(email_user, email_password)
-        server.sendmail(email_user, recipient_email, msg.as_string())
-
-def check_twitter_announcements():
-    exchanges = ["Binance", "Coinbase", "Kraken", "Bithumb", "Bitfinex", "KuCoin", "OKX", "Gate.io", "Bybit",
-                 "Bitget", "MEXC", "HTX", "BingX", "Crypto.com", "BitMart", "LBank", "XT.com", "AscendEX",
-                 "CoinW", "Weex", "Toobit", "DigiFinex", "P2B", "KCEX", "Bvow", "FameEX", "OrangeX",
-                 "WhiteBIT", "HBIT", "Tapbit", "Azbit", "LATOKEN", "Ourbit", "BigONE", "BioFin", "Bika"]
-    query = " OR ".join([f'"{exchange} will list" OR "{exchange} to list"' for exchange in exchanges])
-    
-    for tweet in api.search(q=query, count=100):
-        send_email("New Crypto Listing Announced", tweet.text)
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(email_user, email_password)
+            server.sendmail(email_user, recipient_email, msg.as_string())
+        print("Email sent successfully")
+    except Exception as e:
+        print(f"Error sending email: {e}")
 
 def get_upcoming_listings(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
-    patterns = ["will be listed on", "new listing", "upcoming listing"]
-    
-    listings = soup.find_all('div', class_='announcement')
-    
-    for listing in listings:
-        for pattern in patterns:
-            if pattern in listing.text.lower():
-                send_email("New Crypto Listing Announced", listing.text.strip())
-                break
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        patterns = ["will be listed on", "new listing", "upcoming listing"]
+        listings = soup.find_all('div', class_='announcement')
+        
+        for listing in listings:
+            for pattern in patterns:
+                if pattern in listing.text.lower():
+                    # Extract and parse the date from the listing text
+                    # Assuming the date format as YYYY-MM-DD for this example
+                    date_str = '2024-12-08'  # Placeholder: extract actual date from listing.text
+                    listing_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                    
+                    if listing_date >= datetime.now().date():
+                        send_email("New Crypto Listing Announced", listing.text.strip())
+                    break
+        print(f"Checked listings for {url}")
+    except Exception as e:
+        print(f"Error checking listings for {url}: {e}")
 
 # Example URLs (replace with actual URLs of the announcement pages)
 urls = [
@@ -68,6 +61,5 @@ urls = [
     'https://support.bitmart.com/hc/en-us/sections/360000908874-New-Listings'
 ]
 
-check_twitter_announcements()
 for url in urls:
     get_upcoming_listings(url)
