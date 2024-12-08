@@ -24,3 +24,12 @@ jobs:
 
     - name: Run script
       run: python main.py
+      continue-on-error: true
+
+    - name: Display script output
+      if: failure()
+      run: cat $GITHUB_WORKSPACE/main.py
+
+    - name: Display logs
+      if: failure()
+      run: cat $GITHUB_WORKSPACE/logs/* || true
