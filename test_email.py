@@ -22,9 +22,11 @@ def send_test_email(subject, body):
             server.set_debuglevel(1)  # Enable debug output for SMTP
             print("Starting TLS...")
             server.starttls()
+            print("TLS started")
             print("Logging in to SMTP server...")
             server.login(email_user, email_password)
             print("Logged in successfully")
+            print("Sending email...")
             server.sendmail(email_user, recipient_email, msg.as_string())
             print("Test email sent successfully")
     except Exception as e:
