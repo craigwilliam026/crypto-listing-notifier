@@ -2,8 +2,8 @@ name: Crypto Listing Notifier
 
 on:
   schedule:
-    # Runs every hour
-    - cron: '0 * * * *'
+    # Runs every minute
+    - cron: '* * * * *'
 
 jobs:
   check-listings:
