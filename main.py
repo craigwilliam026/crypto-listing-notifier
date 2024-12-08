@@ -42,7 +42,7 @@ def get_upcoming_listings(url):
     start_time = time.time()
     try:
         headers = {'User-Agent': random.choice(user_agents)}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, 'html.parser')
         
         patterns = ["will be listed on", "new listing", "upcoming listing"]
@@ -51,7 +51,6 @@ def get_upcoming_listings(url):
         for listing in listings:
             for pattern in patterns:
                 if pattern in listing.text.lower():
-                    # Extract and parse the date from the listing text
                     date_str = '2024-12-08'  # Placeholder: extract actual date from listing.text
                     listing_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                     
@@ -60,7 +59,7 @@ def get_upcoming_listings(url):
                         send_email("New Crypto Listing Announced", listing.text.strip())
                     break
         print(f"Completed checking listings for {url} in {time.time() - start_time:.2f} seconds")
-        time.sleep(random.uniform(1, 5))  # Random delay between 1 to 5 seconds
+        time.sleep(random.uniform(1, 3))  # Reduced delay between 1 to 3 seconds
     except Exception as e:
         print(f"Error checking listings for {url}: {e}")
 
@@ -76,7 +75,7 @@ def check_twitter_announcements():
         try:
             headers = {'User-Agent': random.choice(user_agents)}
             url = f"https://twitter.com/search?q={query}&f=live"
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=10)
             soup = BeautifulSoup(response.content, 'html.parser')
             
             tweets = soup.find_all('div', {'data-testid': 'tweet'})
@@ -90,7 +89,7 @@ def check_twitter_announcements():
                     print("New tweet found, preparing to send email.")
                     send_email("New Crypto Listing Announced", tweet_text)
             print(f"Checked Twitter for query: {query}")
-            time.sleep(random.uniform(1, 5))  # Random delay between 1 to 5 seconds
+            time.sleep(random.uniform(1, 3))  # Reduced delay between 1 to 3 seconds
         except Exception as e:
             print(f"Error checking Twitter for query {query}: {e}")
     print(f"Completed checking Twitter announcements in {time.time() - start_time:.2f} seconds")
