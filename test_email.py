@@ -2,10 +2,10 @@ import smtplib
 from email.mime.text import MIMEText
 import os
 
-# Email credentials for ProtonMail
-smtp_server = 'smtp.protonmail.com'
+# Email credentials for Outlook/Hotmail
+smtp_server = 'smtp-mail.outlook.com'
 smtp_port = 587
-email_user = os.getenv('EMAIL_USER')  # Ensure these are set in your environment or GitHub secrets
+email_user = os.getenv('EMAIL_USER')  # Ensure these are set in your GitHub secrets
 email_password = os.getenv('EMAIL_PASSWORD')
 recipient_email = 'lelouch0zerogeass@gmail.com'
 
@@ -18,10 +18,13 @@ def send_test_email(subject, body):
     
     try:
         with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.set_debuglevel(1)  # Enable debug output for SMTP
             server.starttls()
+            print("Starting TLS...")
             server.login(email_user, email_password)
+            print("Logged in to SMTP server...")
             server.sendmail(email_user, recipient_email, msg.as_string())
-        print("Test email sent successfully")
+            print("Test email sent successfully")
     except Exception as e:
         print(f"Error sending test email: {e}")
 
