@@ -17,7 +17,7 @@ def send_test_email(subject, body):
     msg['To'] = recipient_email
     
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=30) as server:
             server.set_debuglevel(1)  # Enable debug output for SMTP
             server.starttls()
             print("Starting TLS...")
