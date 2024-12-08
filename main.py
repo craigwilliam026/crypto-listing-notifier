@@ -22,6 +22,7 @@ user_agents = [
 ]
 
 def send_email(subject, body):
+    print("Preparing to send email...")
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = email_user
@@ -37,6 +38,8 @@ def send_email(subject, body):
         print(f"Error sending email: {e}")
 
 def get_upcoming_listings(url):
+    print(f"Checking listings for {url}...")
+    start_time = time.time()
     try:
         headers = {'User-Agent': random.choice(user_agents)}
         response = requests.get(url, headers=headers)
@@ -53,14 +56,16 @@ def get_upcoming_listings(url):
                     listing_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                     
                     if listing_date >= datetime.now().date():
+                        print("New listing found, preparing to send email.")
                         send_email("New Crypto Listing Announced", listing.text.strip())
                     break
-        print(f"Checked listings for {url}")
+        print(f"Completed checking listings for {url} in {time.time() - start_time:.2f} seconds")
         time.sleep(random.uniform(1, 5))  # Random delay between 1 to 5 seconds
     except Exception as e:
         print(f"Error checking listings for {url}: {e}")
 
 def check_twitter_announcements():
+    start_time = time.time()
     exchanges = ["Binance", "Coinbase", "Kraken", "Bithumb", "Bitfinex", "KuCoin", "OKX", "Gate.io", "Bybit",
                  "Bitget", "MEXC", "HTX", "BingX", "Crypto.com", "BitMart", "LBank", "XT.com", "AscendEX",
                  "CoinW", "Weex", "Toobit", "DigiFinex", "P2B", "KCEX", "Bvow", "FameEX", "OrangeX",
@@ -82,11 +87,13 @@ def check_twitter_announcements():
                 
                 tweet_datetime = datetime.fromisoformat(tweet_date[:-1])
                 if tweet_datetime.date() >= datetime.now().date():
+                    print("New tweet found, preparing to send email.")
                     send_email("New Crypto Listing Announced", tweet_text)
             print(f"Checked Twitter for query: {query}")
             time.sleep(random.uniform(1, 5))  # Random delay between 1 to 5 seconds
         except Exception as e:
             print(f"Error checking Twitter for query {query}: {e}")
+    print(f"Completed checking Twitter announcements in {time.time() - start_time:.2f} seconds")
 
 # Example URLs (replace with actual URLs of the announcement pages)
 urls = [
@@ -99,6 +106,8 @@ urls = [
     'https://support.bitmart.com/hc/en-us/sections/360000908874-New-Listings'
 ]
 
+print("Starting Twitter announcements check...")
 check_twitter_announcements()
 for url in urls:
     get_upcoming_listings(url)
+print("Finished checking all sources.")
